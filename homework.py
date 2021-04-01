@@ -35,6 +35,7 @@ class CashCalculator(Calculator):
     USD_RATE = 74.00
     EURO_RATE = 88.00
     RUB_RATE = 1.00
+    
     def get_today_cash_remained(self, currancy):
         self.currancy = currancy
         spent_today = self.get_today_stats()
@@ -44,11 +45,12 @@ class CashCalculator(Calculator):
             'eur': ['Euro', self.EURO_RATE],
             'rub': ['руб', self.RUB_RATE]
         }
+        
         if currancy in currancies:     
             cur_name, cur_rate = currancies[currancy]
             left_in_cur = (result / cur_rate)
             if result == 0:
-                return (f'Денег нет, держись')
+                return ('Денег нет, держись')
             elif result > 0:
                 result = (round(left_in_cur, 2))
                 return (f'На сегодня осталось {result} {cur_name}')
