@@ -1,18 +1,25 @@
-import datetime as dt 
+import datetime as dt
+
+
 class Calculator:
-    def __init__ (self, limit):
+    def __init__(self, limit):
         self.limit = limit
         self.records = []
+
     def add_record(self, record):
         self.records.append(record)
-    def get_today_stats(self):  
+
+    def get_today_stats(self):
         return sum(record.amount for record in self.records
                    if record.date == dt.date.today())
+
     def get_week_stats(self):
         current_date = dt.date.today()
         week_ago = current_date - dt.timedelta(weeks=1)
         return sum(record.amount for record in self.records
                    if week_ago < record.date <= dt.date.today())
+
+
 class CaloriesCalculator(Calculator):
     def get_calories_remained(self):
         eaten_today = self.get_today_stats()
@@ -22,6 +29,8 @@ class CaloriesCalculator(Calculator):
                     'но с общей калорийностью не более ' f'{result} кКал')
         else:
             return ('Хватит есть!')
+
+
 class CashCalculator(Calculator):
     USD_RATE = 74.00
     EURO_RATE = 88.00
@@ -50,6 +59,8 @@ class CashCalculator(Calculator):
                         f'{result} {cur_name}')
         else:
             return('Пожалуйста, выберите одну из нормальных валют.')
+
+
 class Record:
     def __init__(self, amount, comment, date=None):
         self.amount = amount
