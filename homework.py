@@ -1,27 +1,28 @@
 import datetime as dt
+from __future__ import annotations
 
 
-class Calculator:
-    def __init__(self, limit):
+class Calculator:  # создаём родительский класс "калькулятор"
+    def __init__(self, limit: union[int, float]) -> None:
         self.limit = limit
         self.records = []
 
-    def add_record(self, record):
+    def add_record(self, record) -> list[Record, ...]]:  # добавляем запись
         self.records.append(record)
 
-    def get_today_stats(self):
+    def get_today_stats(self) -> float:  # считаем сумму за сегодня
         return sum(record.amount for record in self.records
                    if record.date == dt.date.today())
 
-    def get_week_stats(self):
+    def get_week_stats(self) -> union[int, float]:  # считаем сумму за неделю
         current_date = dt.date.today()
         week_ago = current_date - dt.timedelta(weeks=1)
         return sum(record.amount for record in self.records
                    if week_ago < record.date <= dt.date.today())
 
 
-class CaloriesCalculator(Calculator):
-    def get_calories_remained(self):
+class CaloriesCalculator(Calculator):  # наследуем калькулятор каллорий
+    def get_calories_remained(self) -> str:  # определям сколько осталось
         eaten_today = self.get_today_stats()
         result = round(self.limit - eaten_today, 2)
         if result > 0:
@@ -31,15 +32,15 @@ class CaloriesCalculator(Calculator):
             return ('Хватит есть!')
 
 
-class CashCalculator(Calculator):
-    USD_RATE = 74.00
+class CashCalculator(Calculator):  # наследуем калькулятор денег
+    USD_RATE = 74.00  # определяем валюты
     EURO_RATE = 88.00
     RUB_RATE = 1.00
 
-    def get_today_cash_remained(self, currancy):
+    def get_today_cash_remained(self, currancy -> str) -> str:  # определяем сколько осталось
         self.currancy = currancy
         spent_today = self.get_today_stats()
-        result = self.limit - spent_today
+        result = self.limit - spent_today  #создаём словарь для пересчёта валют
         currancies = {
             'usd': ['USD', self.USD_RATE],
             'eur': ['Euro', self.EURO_RATE],
@@ -63,8 +64,9 @@ class CashCalculator(Calculator):
             return('Пожалуйста, выберите одну из нормальных валют.')
 
 
-class Record:
-    def __init__(self, amount, comment, date=None):
+class Record:  # создаём класс "запись", аккумулирующий данные
+    rec_type = tuple[union[int, float], str, datetime]
+    def __init__(self, amount: union [int, float], comment: str, date=None) -> rec_type:
         self.amount = amount
         if comment is None:
             self.comment = 'Просто так'
