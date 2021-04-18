@@ -4,6 +4,8 @@ from typing import Optional
 
 class Calculator:
     """создаём родительский класс калькулятор"""
+    today = dt.date.today()
+
     def __init__(self, limit: float) -> None:
         self.limit = limit
         self.records = []
@@ -15,25 +17,28 @@ class Calculator:
     def get_today_stats(self) -> float:
         """считаем сумму за сегодня"""
         return sum(record.amount for record in self.records
-                   if record.date == dt.date.today())
+                   if record.date == self.today)
+
+    def get_what_left(self) -> float:
+        spent_from_limit = self.get_today_stats()
+        return self.limit - spent_from_limit
 
     def get_week_stats(self) -> float:
         """считаем сумму за неделю"""
-        current_date = dt.date.today()
-        week_ago = current_date - dt.timedelta(weeks=1)
+        week_ago = self.today - dt.timedelta(weeks=1)
         return sum(record.amount for record in self.records
-                   if week_ago < record.date <= dt.date.today())
+                   if week_ago < record.date <= self.today)
 
 
 class CaloriesCalculator(Calculator):
     """наследуем калькулятор каллорий"""
     def get_calories_remained(self) -> str:
         """определям сколько осталось от лимита"""
-        eaten_today = self.get_today_stats()
-        result = round(self.limit - eaten_today, 2)
-        if result > 0:
+        lef_for_today = self.get_what_left()
+        if lef_for_today > 0:
             return ('Сегодня можно съесть что-нибудь ещё, '
-                    'но с общей калорийностью не более ' f'{result} кКал')
+                    'но с общей калорийностью не более '
+                    f'{lef_for_today} кКал')
         else:
             return ('Хватит есть!')
 
@@ -46,21 +51,20 @@ class CashCalculator(Calculator):
 
     def get_today_cash_remained(self, currancy: str) -> str:
         """определяем сколько осталось"""
-        self.currancy = currancy
-        spent_today = self.get_today_stats()
-        result = self.limit - spent_today
+        left_for_today = self.get_what_left()
+        if left_for_today == 0:
+            return 'Денег нет, держись'
+
         currancies = {
-            'usd': ['USD', self.USD_RATE],
-            'eur': ['Euro', self.EURO_RATE],
-            'rub': ['руб', self.RUB_RATE]
+            'usd': ('USD', self.USD_RATE),
+            'eur': ('Euro', self.EURO_RATE),
+            'rub': ('руб', self.RUB_RATE),
         }
 
         if currancy in currancies:
             cur_name, cur_rate = currancies[currancy]
-            left_in_cur = (result / cur_rate)
-            if result == 0:
-                return ('Денег нет, держись')
-            elif result > 0:
+            left_in_cur = left_for_today / cur_rate
+            if left_in_cur > 0:
                 result = (round(left_in_cur, 2))
                 return (f'На сегодня осталось {result} {cur_name}')
             else:
@@ -77,11 +81,9 @@ class Record:
     def __init__(self, amount: float, comment: str,
                  date: Optional[str] = None) -> None:
         self.amount = amount
-        if comment is None:
-            self.comment = 'Просто так'
-        else:
-            self.comment = comment
+        self.comment = comment
+        DATE_FORMAT = '%d.%m.%Y'
         if date is None:
             self.date = dt.date.today()
         else:
-            self.date = dt.datetime.strptime(date, '%d.%m.%Y').date()
+            self.date = dt.datetime.strptime(date, DATE_FORMAT).date()
